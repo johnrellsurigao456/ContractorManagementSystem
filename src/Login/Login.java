@@ -6,8 +6,10 @@
 package Login;
 
 import Register.Sign_Up;
+import config.SessionManager;
 import javax.swing.JOptionPane;
 import config.config;
+import java.awt.Color;
 import java.sql.*;
 
 
@@ -22,6 +24,7 @@ public class Login extends javax.swing.JFrame {
      */
     public Login() {
         initComponents();
+        setupEmailField();
     }
 
     /**
@@ -41,6 +44,8 @@ public class Login extends javax.swing.JFrame {
         jpassword = new javax.swing.JPasswordField();
         bback = new javax.swing.JButton();
         blog_in = new javax.swing.JButton();
+        jLabelEmail = new javax.swing.JLabel();
+        jTextField1 = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -57,20 +62,20 @@ public class Login extends javax.swing.JFrame {
         jLabel3.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setText("USERNAME:");
-        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, -1, -1));
+        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, -1, -1));
 
         jLabel4.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(255, 255, 255));
         jLabel4.setText("PASSWORD:");
-        jPanel1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 110, -1, -1));
+        jPanel1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 120, -1, -1));
 
         jtuser.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jtuserActionPerformed(evt);
             }
         });
-        jPanel1.add(jtuser, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 70, 120, -1));
-        jPanel1.add(jpassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 110, 120, -1));
+        jPanel1.add(jtuser, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 60, 120, -1));
+        jPanel1.add(jpassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 120, 120, -1));
 
         bback.setBackground(new java.awt.Color(204, 204, 255));
         bback.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
@@ -94,6 +99,12 @@ public class Login extends javax.swing.JFrame {
         });
         jPanel1.add(blog_in, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 160, -1, 30));
 
+        jLabelEmail.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabelEmail.setForeground(new java.awt.Color(255, 255, 255));
+        jLabelEmail.setText("EMAIL");
+        jPanel1.add(jLabelEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, 70, -1));
+        jPanel1.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 90, 120, -1));
+
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 100, 250, 220));
 
         jLabel1.setIcon(new javax.swing.ImageIcon("C:\\Users\\Dell\\Downloads\\f40f2281-d1ea-424c-8099-0d90ca659282.jpg")); // NOI18N
@@ -107,7 +118,7 @@ public class Login extends javax.swing.JFrame {
         // TODO add your handling code here:
         jpassword.requestFocus();
     }//GEN-LAST:event_jtuserActionPerformed
-
+      
     private void bbackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bbackActionPerformed
         // TODO add your handling code here:
          new Sign_Up().setVisible(true);
@@ -115,19 +126,50 @@ public class Login extends javax.swing.JFrame {
     }//GEN-LAST:event_bbackActionPerformed
 
     private void blog_inActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_blog_inActionPerformed
-             String username = jtuser.getText().trim();
+  String username = jtuser.getText().trim();
+        String email = jTextField1.getText().trim();
         String password = new String(jpassword.getPassword()).trim();
         
-        if(username.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(this, 
-                "Please enter Username and Password!", 
-                "Validation Error", 
-                JOptionPane.ERROR_MESSAGE);
+        // ✅ REMOVE PLACEHOLDER (if any)
+        if (email.equals("user@example.com")) {
+            email = "";
+        }
+        
+        // ✅ VALIDATION - Must fill either username OR email
+        if((username.isEmpty() && email.isEmpty()) || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "⚠️ Please enter:\n\n" +
+                "  • Username OR Email\n" +
+                "  • Password\n\n" +
+                "You can login using either your username or email address.",
+                "Missing Information",
+                JOptionPane.WARNING_MESSAGE);
             return;
         }
         
+        // ✅ VALIDATE EMAIL IF PROVIDED
+        if(!email.isEmpty() && !isValidEmail(email)) {
+            JOptionPane.showMessageDialog(this,
+                "❌ Invalid Email Format!\n\n" +
+                "You entered: '" + email + "'\n\n" +
+                "Valid email format:\n" +
+                "  ✓ user@gmail.com\n\n" +
+                "Email must be @gmail.com",
+                "Invalid Email",
+                JOptionPane.ERROR_MESSAGE);
+            
+            java.awt.EventQueue.invokeLater(() -> {
+                jTextField1.requestFocus();
+                jTextField1.selectAll();
+            });
+            return;
+        }
+        
+        // ✅ USE WHICHEVER IS FILLED (username or email)
+        String usernameOrEmail = !username.isEmpty() ? username : email;
+        
         config cfg = new config();
-        String role = cfg.validateLogin(username, password);
+        String role = cfg.validateLogin(usernameOrEmail, password);
         
         if(role != null) {
             if(role.equals("PENDING")) {
@@ -144,44 +186,51 @@ public class Login extends javax.swing.JFrame {
             }
             
             if(role.equals("NOROLE")) {
-                JOptionPane.showMessageDialog(this, 
+                JOptionPane.showMessageDialog(this,
                     "✅ Login Successful!\n\n" +
-                    "Please select your role to continue.", 
-                    "Welcome", 
+                    "Please select your role to continue.",
+                    "Welcome",
                     JOptionPane.INFORMATION_MESSAGE);
                 
                 this.dispose();
-                new Dashboard.RoleSelectionDashboard(username).setVisible(true);
+                
+                String actualUsername = cfg.getUsernameFromEmailOrUsername(usernameOrEmail);
+                new Dashboard.RoleSelectionDashboard(actualUsername).setVisible(true);
                 return;
             }
             
-            JOptionPane.showMessageDialog(this, 
+            // ✅ GET ACTUAL USERNAME
+            String actualUsername = cfg.getUsernameFromEmailOrUsername(usernameOrEmail);
+            
+            SessionManager.getInstance().login(actualUsername, role);
+            
+            JOptionPane.showMessageDialog(this,
                 "✅ Login Successful!\n" +
-                "Welcome back, " + username + "!", 
-                "Success", 
+                "Welcome back, " + actualUsername + "!",
+                "Success",
                 JOptionPane.INFORMATION_MESSAGE);
             
             this.dispose();
             
             switch (role.toLowerCase()) {
                 case "admin":
-                    new Dashboard.AdminDashboard(username).setVisible(true);
+                    new Dashboard.AdminDashboard(actualUsername).setVisible(true);
                     break;
                 case "contractor":
-                    new Dashboard.ContractorDashboard(username).setVisible(true);
+                    new Dashboard.ContractorDashboard(actualUsername).setVisible(true);
                     break;
                 case "client":
-                    new Dashboard.ClientDashboard(username).setVisible(true);
+                    new Dashboard.ClientDashboard(actualUsername).setVisible(true);
                     break;
                 default:
-                    new Dashboard.RoleSelectionDashboard(username).setVisible(true);
+                    new Dashboard.RoleSelectionDashboard(actualUsername).setVisible(true);
             }
             
         } else {
-            JOptionPane.showMessageDialog(this, 
-                "❌ Wrong Username or Password!\n\n" +
-                "Please try again.", 
-                "Login Failed", 
+            JOptionPane.showMessageDialog(this,
+                "❌ Wrong Username/Email or Password!\n\n" +
+                "Please check your credentials and try again.",
+                "Login Failed",
                 JOptionPane.ERROR_MESSAGE);
             
             jpassword.setText("");
@@ -224,7 +273,9 @@ public class Login extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabelEmail;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JTextField jTextField1;
     private javax.swing.JPasswordField jpassword;
     private javax.swing.JTextField jtuser;
     // End of variables declaration//GEN-END:variables
@@ -256,10 +307,137 @@ public class Login extends javax.swing.JFrame {
     }
     }
 
+    private void setupEmailField() {
+         jTextField1.setText("");
+        jTextField1.setForeground(new Color(150, 150, 150));
+        jTextField1.setToolTipText("Enter your email (e.g., user@gmail.com)");
+        
+        jTextField1.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (jTextField1.getText().equals("")) {
+                    jTextField1.setText("");
+                    jTextField1.setForeground(Color.BLACK);
+                }
+            }
+            
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (jTextField1.getText().trim().isEmpty()) {
+                    jTextField1.setText("");
+                    jTextField1.setForeground(new Color(150, 150, 150));
+                }
+            }
+        });
+    }
+
+    private boolean isValidEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+        
+        email = email.trim().toLowerCase();  // ✅ Convert to lowercase
+        
+        // ✅ MUST END WITH @gmail.com
+        if (!email.endsWith("@gmail.com")) {
+            return false;
+        }
+        
+        // ✅ MUST HAVE SOMETHING BEFORE @gmail.com
+        String username = email.replace("@gmail.com", "");
+        if (username.isEmpty()) {
+            return false;
+        }
+        
+        // ✅ CHECK IF VALID FORMAT (user@gmail.com)
+        int atCount = email.length() - email.replace("@", "").length();
+        if (atCount != 1) {
+            return false;
+        }
+        
+        // ✅ NO SPACES ALLOWED
+        if (email.contains(" ")) {
+            return false;
+        }
+        
+        return true;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
 
-       @Override
-public void setVisible(boolean b) {
-    super.setVisible(b);
-}
-    }
+ 
+    

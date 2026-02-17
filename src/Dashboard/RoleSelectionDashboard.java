@@ -1,6 +1,7 @@
 package Dashboard;
 
 import Login.Login;
+import config.SessionManager;
 import config.config;
 import javax.swing.*;
 import java.awt.*;
@@ -349,7 +350,19 @@ private static final String ADMIN_SECRET_CODE = "ADMIN2026";
     new Login().setVisible(true);
 }
 
-    private void btnLogoutActionPerformed(ActionEvent e) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+   private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {
+    int confirm = JOptionPane.showConfirmDialog(this,
+        "Return to login screen?",
+        "Confirm",
+        JOptionPane.YES_NO_OPTION);
+    
+    if (confirm == JOptionPane.YES_OPTION) {
+        // ✅ CLEAR SESSION FIRST!
+        SessionManager.getInstance().logout();
+        
+        this.dispose();
+        new Login().setVisible(true);
+        
     }
+}
 }

@@ -7,6 +7,7 @@ package Register;
 import Login.Login;
 import javax.swing.JOptionPane;
 import config.config;
+import java.awt.Color;
 import java.sql.*;
 
 public class Sign_Up extends javax.swing.JFrame {
@@ -15,7 +16,8 @@ public class Sign_Up extends javax.swing.JFrame {
      * Creates new form Signin
      */
     public Sign_Up() {
-        initComponents();
+        initComponents(); 
+         setupEmailField();
     }
 
     /**
@@ -36,6 +38,8 @@ public class Sign_Up extends javax.swing.JFrame {
         bexit = new javax.swing.JButton();
         bsign_in = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
+        jLabelEmail = new javax.swing.JLabel();
+        jTextField1 = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -52,20 +56,20 @@ public class Sign_Up extends javax.swing.JFrame {
         jLabel3.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setText("USERNAME:");
-        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, -1, -1));
+        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 60, -1, -1));
 
         jLabel4.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(255, 255, 255));
         jLabel4.setText("PASSWORD:");
-        jPanel1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 110, -1, -1));
+        jPanel1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 120, -1, -1));
 
         jtuser.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jtuserActionPerformed(evt);
             }
         });
-        jPanel1.add(jtuser, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 70, 120, -1));
-        jPanel1.add(jpassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 110, 120, -1));
+        jPanel1.add(jtuser, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 60, 120, -1));
+        jPanel1.add(jpassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 120, 120, -1));
 
         bexit.setBackground(new java.awt.Color(204, 204, 255));
         bexit.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
@@ -100,6 +104,12 @@ public class Sign_Up extends javax.swing.JFrame {
         });
         jPanel1.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 190, -1, -1));
 
+        jLabelEmail.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabelEmail.setForeground(new java.awt.Color(255, 255, 255));
+        jLabelEmail.setText("EMAIL");
+        jPanel1.add(jLabelEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, -1, -1));
+        jPanel1.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 90, 120, -1));
+
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 100, 250, 220));
 
         jLabel1.setIcon(new javax.swing.ImageIcon("C:\\Users\\Dell\\Downloads\\f40f2281-d1ea-424c-8099-0d90ca659282.jpg")); // NOI18N
@@ -113,33 +123,34 @@ public class Sign_Up extends javax.swing.JFrame {
         // TODO add your handling code here:
         jpassword.requestFocus();
         }
+    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {
+        jpassword.requestFocus();  // ✅ FOCUS TO PASSWORD
+    }
 
         // Method para check kung ang username already exists
-        private boolean usernameExists(String username) {
-           try {
+          private boolean usernameExists(String username) {
+        try {
             config cfg = new config();
             Connection conn = cfg.connectDB();
             String sql = "SELECT * FROM users WHERE username = ?";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
-
+            
             ResultSet rs = pstmt.executeQuery();
             boolean exists = rs.next();
-
+            
             rs.close();
             pstmt.close();
             conn.close();
-
+            
             return exists;
-
+            
         } catch(SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this,
-                "Database error: " + e.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
             return false;
         }
+    
+    
             // Method para i-save ang user sa database
 
     }//GEN-LAST:event_jtuserActionPerformed
@@ -150,39 +161,101 @@ public class Sign_Up extends javax.swing.JFrame {
     }//GEN-LAST:event_bexitActionPerformed
 
     private void bsign_inActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bsign_inActionPerformed
-        String username = jtuser.getText().trim();
+       String username = jtuser.getText().trim();
+        String email = jTextField1.getText().trim();  // ✅ GET FROM TEXTFIELD, NOT LABEL!
         String password = new String(jpassword.getPassword()).trim();
-
-        if(username.isEmpty() || password.isEmpty()) {
+        
+        // ✅ REMOVE PLACEHOLDER
+        if (email.equals("user@example.com")) {
+            email = "";
+        }
+        
+        // ✅ VALIDATION
+        if(username.isEmpty() || email.isEmpty() || password.isEmpty()) {
             JOptionPane.showMessageDialog(this,
-                "Username and Password are required!",
-                "Validation Error",
-                JOptionPane.ERROR_MESSAGE);
+                "⚠️ All fields are required!\n\n" +
+                "Please fill in:\n" +
+                "  • Username\n" +
+                "  • Email (example: user@gmail.com)\n" +
+                "  • Password",
+                "Missing Information",
+                JOptionPane.WARNING_MESSAGE);
             return;
         }
-
+        
+        // ✅ VALIDATE EMAIL
+        if(!isValidEmail(email)) {
+            JOptionPane.showMessageDialog(this,
+                "❌ Invalid Email Format!\n\n" +
+                "You entered: '" + email + "'\n\n" +
+                "Valid email examples:\n" +
+                "  ✓ user@gmail.com\n" +
+                "  ✓ john.doe@example.com\n" +
+                "  ✓ contact@company.co.uk\n\n" +
+                "Email must contain '@' and a domain name\n" +
+                "(like gmail.com or yahoo.com)",
+                "Invalid Email",
+                JOptionPane.ERROR_MESSAGE);
+            
+            java.awt.EventQueue.invokeLater(() -> {
+                jTextField1.requestFocus();  // ✅ FOCUS TEXTFIELD
+                jTextField1.selectAll();
+            });
+            return;
+        }
+        
+        // ✅ CHECK USERNAME
         if(usernameExists(username)) {
             JOptionPane.showMessageDialog(this,
-                "Username already exists!\nPlease choose a different username.",
+                "❌ Username already taken!\n\n" +
+                "The username '" + username + "' is already registered.\n" +
+                "Please choose a different username.",
                 "Registration Error",
                 JOptionPane.ERROR_MESSAGE);
+            
+            java.awt.EventQueue.invokeLater(() -> {
+                jtuser.requestFocus();
+                jtuser.selectAll();
+            });
             return;
         }
-
-        if(saveUser(username, password)) {
+        
+        // ✅ CHECK EMAIL
+        if(emailExists(email)) {
             JOptionPane.showMessageDialog(this,
-                "✅ Account successfully created!\n\nYou can now login and select your role.",
-                "Success",
+                "❌ Email already registered!\n\n" +
+                "The email '" + email + "' is already in use.\n" +
+                "Please use a different email address\n" +
+                "or login with this email.",
+                "Registration Error",
+                JOptionPane.ERROR_MESSAGE);
+            
+            java.awt.EventQueue.invokeLater(() -> {
+                jTextField1.requestFocus();  // ✅ FOCUS TEXTFIELD
+                jTextField1.selectAll();
+            });
+            return;
+        }
+        
+        // ✅ SAVE USER
+        if(saveUser(username, email, password)) {
+            JOptionPane.showMessageDialog(this,
+                "✅ Account Successfully Created!\n\n" +
+                "Username: " + username + "\n" +
+                "Email: " + email + "\n\n" +
+                "You can now login using your username or email.",
+                "Welcome!",
                 JOptionPane.INFORMATION_MESSAGE);
-
+            
             new Login().setVisible(true);
             this.dispose();
         } else {
             JOptionPane.showMessageDialog(this,
-                "❌ Error saving account.\nPlease try again.",
+                "❌ Error Creating Account\n\n" +
+                "Something went wrong. Please try again.",
                 "Error",
                 JOptionPane.ERROR_MESSAGE);
-        } 
+        }
     }//GEN-LAST:event_bsign_inActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -226,20 +299,23 @@ public class Sign_Up extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabelEmail;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JTextField jTextField1;
     private javax.swing.JPasswordField jpassword;
     private javax.swing.JTextField jtuser;
     // End of variables declaration//GEN-END:variables
 
-    private boolean saveUser(String username, String password) {
+    private boolean saveUser(String username, String email, String password) {
         try {
             config conf = new config();
             Connection conn = conf.connectDB();
             
-            String sql = "INSERT INTO users (username, password, role, status) VALUES (?, ?, NULL, 'active')";
+            String sql = "INSERT INTO users (username, email, password, role, status) VALUES (?, ?, ?, NULL, 'active')";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
-            pstmt.setString(2, password);
+            pstmt.setString(2, email);
+            pstmt.setString(3, password);
             
             int rowsInserted = pstmt.executeUpdate();
             
@@ -250,10 +326,6 @@ public class Sign_Up extends javax.swing.JFrame {
             
         } catch(Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, 
-                "Error saving user: " + e.getMessage(), 
-                "Error", 
-                JOptionPane.ERROR_MESSAGE);
             return false;
         }
     }
@@ -268,5 +340,83 @@ public class Sign_Up extends javax.swing.JFrame {
 
     public String validateLogin(String username, String password) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private boolean emailExists(String email) {
+       try {
+            config cfg = new config();
+            Connection conn = cfg.connectDB();
+            String sql = "SELECT * FROM users WHERE email = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, email);
+            
+            ResultSet rs = pstmt.executeQuery();
+            boolean exists = rs.next();
+            
+            rs.close();
+            pstmt.close();
+            conn.close();
+            
+            return exists;
+            
+        } catch(SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+   private boolean isValidEmail(String email) {
+      if (email == null || email.trim().isEmpty()) {
+        return false;
+    }
+    
+    email = email.trim().toLowerCase();  // ✅ Convert to lowercase
+    
+    // ✅ MUST END WITH @gmail.com
+    if (!email.endsWith("@gmail.com")) {
+        return false;
+    }
+    
+    // ✅ MUST HAVE SOMETHING BEFORE @gmail.com
+    String username = email.replace("@gmail.com", "");
+    if (username.isEmpty()) {
+        return false;
+    }
+    
+    // ✅ CHECK IF VALID FORMAT (user@gmail.com)
+    int atCount = email.length() - email.replace("@", "").length();
+    if (atCount != 1) {
+        return false;
+    }
+    
+    // ✅ NO SPACES ALLOWED
+    if (email.contains(" ")) {
+        return false;
+    }
+    
+    return true;
+    }
+     
+   
+    private void setupEmailField() {
+        jTextField1.setText("");
+        jTextField1.setForeground(new Color(150, 150, 150));
+        jTextField1.setToolTipText("Enter your email (e.g., user@gmail.com)");
+        
+        jTextField1.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (jTextField1.getText().equals("")) {
+                    jTextField1.setText("");
+                    jTextField1.setForeground(Color.BLACK);
+                }
+            }
+            
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (jTextField1.getText().trim().isEmpty()) {
+                    jTextField1.setText("");
+                    jTextField1.setForeground(new Color(150, 150, 150));
+                }
+            }
+        });
     }
 }
